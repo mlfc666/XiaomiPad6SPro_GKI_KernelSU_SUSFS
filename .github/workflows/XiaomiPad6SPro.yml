@@ -1,0 +1,152 @@
+name: 内核构建 - Android 13 (5.15)
+
+permissions:
+  contents: write
+  actions: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernelsu_variant:
+        description: "KernelSU 变体"
+        required: true
+        type: choice
+        options:
+          - Official
+          #- Next
+          - SukiSU
+          - ReSukiSU
+        default: ReSukiSU
+      kernelsu_branch:
+        description: "KSU 分支"
+        required: true
+        type: choice
+        options:
+          - Stable(标准)
+          - Dev(开发)
+          - Other(其他/指定)
+        default: Stable(标准)
+      version:
+        description: "自定义版本名 (可选)"
+        required: false
+        type: string
+      build_time:
+        description: "自定义构建时间 (可选，N或留空=当前UTC)"
+        required: false
+        type: string
+        default: "Sun Dec 01 08:10:00 UTC 2024"
+      use_kpm:
+        description: "KPM 功能（patched 尚不支持）"
+        required: true
+        type: choice
+        default: "disabled (关闭)"
+        options:
+          - "disabled (关闭)"
+          - "enabled (开启)"
+          - "patched (开启并修补，尚不支持)"
+      droidspaces:
+        description: "Droidspaces 容器支持"
+        required: false
+        type: choice
+        options:
+          - "off"
+          - "678"
+          - "123"
+          - "345"
+        default: "off"
+      use_zram:
+        description: "启用 ZRAM 增强算法"
+        required: true
+        type: boolean
+        default: false
+      use_bbg:
+        description: "启用 BBG 防格机"
+        required: true
+        type: boolean
+        default: false
+      use_rekernel:
+        description: "启用 Re-Kernel 驱动"
+        required: false
+        type: boolean
+        default: false
+      cancel_susfs:
+        description: "禁用 SUSFS"
+        required: true
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      kernelsu_variant:
+        required: true
+        type: string
+      kernelsu_branch:
+        required: true
+        type: string
+      version:
+        required: false
+        type: string
+      build_time:
+        required: false
+        type: string
+        default: "Sun Dec 01 08:10:00 UTC 2024"
+      use_zram:
+        required: true
+        type: boolean
+      use_bbg:
+        required: true
+        type: boolean
+      use_kpm:
+        required: true
+        type: string
+      use_rekernel:
+        required: false
+        type: boolean
+        default: false
+      cancel_susfs:
+        required: false
+        type: boolean
+      droidspaces:
+        required: false
+        type: string
+        default: "off"
+      called_from_main:
+        description: "是否从 main.yml 调用（内部使用）"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-kernels-a13-5-15:
+    name: "5.15.${{ matrix.sub_level }}-${{ matrix.os_patch_level }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sub_level: "178"
+            os_patch_level: "2025-03"
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      android_version: "android13"
+      kernel_version: "5.15"
+      sub_level: ${{ matrix.sub_level }}
+      os_patch_level: ${{ matrix.os_patch_level }}
+      ksu_variant: ${{ inputs.kernelsu_variant }}
+      ksu_branch: ${{ inputs.kernelsu_branch }}
+      version: ${{ inputs.version || '' }}
+      build_time: ${{ inputs.build_time || '' }}
+      use_zram: ${{ inputs.use_zram }}
+      use_bbg: ${{ inputs.use_bbg }}
+      use_kpm: ${{ inputs.use_kpm }}
+      use_rekernel: ${{ inputs.use_rekernel || false }}
+      supp_op: false
+      enable_susfs: ${{ !inputs.cancel_susfs }}
+      droidspaces: ${{ inputs.droidspaces || 'off' }}
+
+  # 仅在直接触发时运行，从 main.yml 调用时跳过
+  get-ksu-manager:
+    if: ${{ !inputs.called_from_main }}
+    uses: ./.github/workflows/get-manager.yml
+    secrets: inherit
+    with:
+      kernelsu_variant: ${{ inputs.kernelsu_variant }}
