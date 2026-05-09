@@ -78,6 +78,27 @@ on:
         type: string
         default: "Sun Dec 01 08:10:00 UTC 2024"
 
+      # ==================== 选项配置 ====================
+      use_kpm:
+        description: "KPM 功能（patched 尚不支持）"
+        required: true
+        type: choice
+        default: "disabled (关闭)"
+        options:
+          - "disabled (关闭)"
+          - "enabled (开启)"
+          - "patched (开启并修补，尚不支持)"
+      droidspaces:
+        description: "Droidspaces 容器支持 (5.10~6.6: 槽位补丁, 6.12: 开/关)"
+        required: false
+        type: choice
+        options:
+          - "off"
+          - "678"
+          - "123"
+          - "345"
+        default: "off"
+
       # ==================== 功能开关 ====================
       use_zram:
         description: "启用 ZRAM 增强算法"
@@ -86,11 +107,6 @@ on:
         default: false
       use_bbg:
         description: "启用 BBG 防格机"
-        required: true
-        type: boolean
-        default: false
-      use_kpm:
-        description: "启用 KPM 功能"
         required: true
         type: boolean
         default: false
@@ -131,6 +147,7 @@ jobs:
       use_rekernel: ${{ inputs.use_rekernel || false }}
       supp_op: ${{ inputs.supp_op || false }}
       enable_susfs: ${{ !inputs.cancel_susfs }}
+      droidspaces: ${{ inputs.droidspaces || 'off' }}
 
   get-ksu-manager:
     uses: ./.github/workflows/get-manager.yml

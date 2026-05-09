@@ -35,6 +35,25 @@ on:
         required: false
         type: string
         default: "Sun Dec 01 08:10:00 UTC 2024"
+      use_kpm:
+        description: "KPM 功能（patched 尚不支持）"
+        required: true
+        type: choice
+        default: "disabled (关闭)"
+        options:
+          - "disabled (关闭)"
+          - "enabled (开启)"
+          - "patched (开启并修补，尚不支持)"
+      droidspaces:
+        description: "Droidspaces 容器支持"
+        required: false
+        type: choice
+        options:
+          - "off"
+          - "678"
+          - "123"
+          - "345"
+        default: "off"
       use_zram:
         description: "启用 ZRAM 增强算法"
         required: true
@@ -42,11 +61,6 @@ on:
         default: false
       use_bbg:
         description: "启用 BBG 防格机"
-        required: true
-        type: boolean
-        default: false
-      use_kpm:
-        description: "启用 KPM 功能"
         required: true
         type: boolean
         default: false
@@ -88,7 +102,7 @@ on:
         type: boolean
       use_kpm:
         required: true
-        type: boolean
+        type: string
       use_rekernel:
         required: false
         type: boolean
@@ -99,6 +113,10 @@ on:
       supp_op:
         required: false
         type: boolean
+      droidspaces:
+        required: false
+        type: string
+        default: "off"
       called_from_main:
         description: "是否从 main.yml 调用（内部使用）"
         required: false
@@ -138,6 +156,8 @@ jobs:
             os_patch_level: "2025-10"
           - sub_level: "118"
             os_patch_level: "2026-01"
+          - sub_level: "127"
+            os_patch_level: "2026-04"
           - sub_level: "X"
             os_patch_level: "lts"
     uses: ./.github/workflows/build.yml
@@ -157,6 +177,7 @@ jobs:
       use_rekernel: ${{ inputs.use_rekernel || false }}
       supp_op: ${{ inputs.supp_op || false }}
       enable_susfs: ${{ !inputs.cancel_susfs }}
+      droidspaces: ${{ inputs.droidspaces || 'off' }}
 
   # 仅在直接触发时运行，从 main.yml 调用时跳过
   get-ksu-manager:

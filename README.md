@@ -46,19 +46,28 @@ Wiki 涵盖内容：
 
 ---
 
-## ❗构建失败常见原因（SukiSU / SUSFS 更新不同步）
+## 🧪 Droidspaces 容器支持（实验性）
 
-当以下两个分支的更新节奏不一致时，构建可能失败：
+> **实验性功能：** 不保证所有 GKI 版本均能成功构建或启动，刷入前请务必备份 Boot 镜像。
+>
+> **TIPS：** 工作流使用的是 [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) 的 [官方补丁](https://github.com/ravindu644/Droidspaces-OSS/tree/main/Documentation/resources/kernel-patches/GKI) ，如有更好的补丁可以提个issues，此外由于存在三个补丁，或许需要反复试验以确保其中一个适配你的机型，请根据他人或实际经验来选择。
 
-- [SukiSU builtin 分支](https://github.com/SukiSU-Ultra/SukiSU-Ultra/tree/builtin)
-- [SUSFS gki-android14-6.1 分支](https://gitlab.com/simonpunk/susfs4ksu/-/tree/gki-android14-6.1?ref_type=heads)
+[Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) 是一个轻量级的 Linux 容器工具，可以在 Android 上运行完整的 Linux 环境（支持 systemd、OpenRC 等），用于搭建开发环境、运行服务器等场景。
 
-例如：SUSFS 刚更新了新提交，但 SukiSU 的 `builtin` 分支还没跟进适配，这时打补丁/编译就容易失败。
+**支持范围：** 5.10 / 5.15 / 6.1 / 6.6 / 6.12
 
-如以下情况，只能等待SukiSU跟进，完成与SUSFS最新提交的适配。
+**使用方式：** 在手动触发构建时，选择 `Droidspaces 容器支持` 选项：
 
-<img src="assets/sukisu_eg1.png" alt="SukiSU builtin 更新记录" width="80%">
-<img src="assets/susfs_eg1.png" alt="SUSFS gki-android14-6.1 更新记录" width="80%">
+| 选项 | 说明 |
+|:---:|:---|
+| `off` | 关闭（默认） |
+| `678` | 使用 6_7_8 槽位补丁（推荐） |
+| `123` | 使用 1_2_3 槽位补丁（备用） |
+| `345` | 使用 3_4_5 槽位补丁（备用） |
+
+> **提示：** 6.12 内核仅有一个补丁，选择任意非关闭选项即可。
+
+**如果构建失败或刷入后 bootloop：** 可尝试切换到其他槽位补丁（如 678 → 123 或 345），不同内核子版本可能适用不同的补丁。
 
 ## 🔧 自定义提交配置
 通过 [`config/config`](config/config) 文件可以指定 SUSFS 和 SukiSU 使用特定的 commit。
